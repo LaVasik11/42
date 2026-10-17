@@ -30,24 +30,17 @@ int main()
 
 	mstack2.push_back(5);
 	mstack2.push_back(17);
-
 	std::cout << mstack2.back() << std::endl;
-
 	mstack2.pop_back();
-
 	std::cout << mstack2.size() << std::endl;
-
 	mstack2.push_back(3);
 	mstack2.push_back(5);
 	mstack2.push_back(737);
 	mstack2.push_back(0);
-
 	std::list<int>::iterator it2 = mstack2.begin();
 	std::list<int>::iterator ite2 = mstack2.end();
-
 	++it2;
 	--it2;
-
 	while (it2 != ite2)
 	{
 		std::cout << *it2 << std::endl;

@@ -7,7 +7,7 @@
 class NotFoundExeption : public std::exception
 {
 public:
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return ("Number not found");
     }

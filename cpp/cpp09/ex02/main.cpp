@@ -29,13 +29,15 @@ int	main(int argc, char **argv)
 		double	time_us = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
 		print_vector(pmerge.get_vector());
 		std::cout << "Time to process a range of " << pmerge.get_vector().size() << " elements with std::[vector] " << time_us << " us" << std::endl;
+		std::cout << "Vector comparisons: " << pmerge.getVectorComparisons() << std::endl;
+
 
 		start = std::clock();
 		pmerge.sortDeque();
 		end = std::clock();
 		time_us = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
-		std::cout << "Time to process a range of " << pmerge.get_vector().size() << " elements with std::[deque] " << time_us << " us" << std::endl;
-
+		std::cout << "Time to process a range of " << pmerge.get_deque().size() << " elements with std::[deque] " << time_us << " us" << std::endl;
+		std::cout << "Deque comparisons: " << pmerge.getDequeComparisons() << std::endl;
 	}
 	catch (std::exception &e)
 	{
@@ -43,4 +45,3 @@ int	main(int argc, char **argv)
 	}
 
 }
-

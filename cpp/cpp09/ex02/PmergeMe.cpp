@@ -1,8 +1,8 @@
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe() {}
+PmergeMe::PmergeMe() :  vecComparisons(0), deqComparisons(0) {}
 
-PmergeMe::PmergeMe(int argc, char **argv)
+PmergeMe::PmergeMe(int argc, char **argv) : vecComparisons(0), deqComparisons(0)
 {
 	int	value;
 
@@ -26,6 +26,8 @@ PmergeMe& PmergeMe::operator=(const PmergeMe& other)
 	{
 		vec = other.vec;
 		deq = other.deq;
+		vecComparisons = other.vecComparisons;
+		deqComparisons = other.deqComparisons;
 	}
 	return (*this);
 }
@@ -43,164 +45,321 @@ const std::deque<int>&	PmergeMe::get_deque() const
 	return (deq);
 }
 
+size_t PmergeMe::getVectorComparisons() const
+{
+    return (vecComparisons);
+}
+
+size_t PmergeMe::getDequeComparisons() const
+{
+    return (deqComparisons);
+}
+
+std::vector<size_t> jacobsthal_sequence(size_t n)
+{
+    std::vector<size_t>	seq;
+    size_t				prev = 1;
+    size_t				curr = 3;
+
+    while (prev < n + 1)
+    {
+        size_t end = curr;
+
+        if (end > n + 1)
+            end = n + 1;
+
+        for (size_t i = end; i > prev; --i)
+            seq.push_back(i - 2);
+
+        size_t next = curr + 2 * prev;
+        prev = curr;
+        curr = next;
+    }
+
+    return (seq);
+}
+
+size_t find_item(const std::vector<FJItem>& chain, size_t id)
+{
+    for (size_t i = 0; i < chain.size(); ++i)
+    {
+        if (chain[i].id == id)
+            return (i);
+    }
+
+    return (chain.size());
+}
+
+void binary_insert(std::vector<FJItem>& chain, const FJItem& item, size_t paired_id, size_t& comparisons)
+{
+    size_t left = 0;
+    size_t right = find_item(chain, paired_id);
+
+    while (left < right)
+    {
+        size_t mid = left + (right - left) / 2;
+
+        ++comparisons;
+
+        if (chain[mid].value < item.value)
+            left = mid + 1;
+        else
+            right = mid;
+    }
+
+    chain.insert(chain.begin() + left, item);
+}
+
+std::vector<FJItem> ford_johnson(const std::vector<FJItem>& arr, size_t& comparisons)
+{
+    if (arr.size() <= 1)
+        return (arr);
+
+    std::vector<FJPair>	pairs;
+    std::vector<FJItem>	larges;
+    FJItem				straggler;
+    bool				has_straggler = false;
+
+    pairs.reserve(arr.size() / 2);
+
+    for (size_t i = 0; i + 1 < arr.size(); i += 2)
+    {
+        FJPair pair;
+
+        ++comparisons;
+
+        if (arr[i].value < arr[i + 1].value)
+        {
+            pair.small = arr[i];
+            pair.large = arr[i + 1];
+        }
+        else
+        {
+            pair.small = arr[i + 1];
+            pair.large = arr[i];
+        }
+
+        pairs.push_back(pair);
+        larges.push_back(pair.large);
+    }
+
+    if (arr.size() % 2 != 0)
+    {
+        straggler = arr.back();
+        has_straggler = true;
+    }
+
+    std::vector<FJItem>	sorted_larges = ford_johnson(larges, comparisons);
+    std::vector<FJPair>	sorted_pairs;
+
+    sorted_pairs.reserve(pairs.size());
+
+    for (size_t i = 0; i < sorted_larges.size(); ++i)
+    {
+        for (size_t j = 0; j < pairs.size(); ++j)
+        {
+            if (pairs[j].large.id == sorted_larges[i].id)
+            {
+                sorted_pairs.push_back(pairs[j]);
+                break;
+            }
+        }
+    }
+
+    std::vector<FJItem> main_chain;
+    std::vector<FJPair> pend;
+
+    if (!sorted_pairs.empty())
+    {
+        main_chain.push_back(sorted_pairs[0].small);
+
+        for (size_t i = 0; i < sorted_larges.size(); ++i)
+            main_chain.push_back(sorted_larges[i]);
+
+        for (size_t i = 1; i < sorted_pairs.size(); ++i)
+            pend.push_back(sorted_pairs[i]);
+    }
+
+    std::vector<size_t> order = jacobsthal_sequence(pend.size());
+
+    for (size_t i = 0; i < order.size(); ++i)
+    {
+        size_t index = order[i];
+
+        if (index < pend.size())
+            binary_insert(main_chain, pend[index].small, pend[index].large.id, comparisons);
+    }
+
+    if (has_straggler)
+        binary_insert(main_chain, straggler, main_chain.size(), comparisons);
+
+    return (main_chain);
+}
+
 void PmergeMe::sortVector()
 {
-	vec = vec_misort(vec);
+    std::vector<FJItem> items;
+
+    items.reserve(vec.size());
+
+    for (size_t i = 0; i < vec.size(); ++i)
+    {
+        FJItem item;
+
+        item.value = vec[i];
+        item.id = i;
+
+        items.push_back(item);
+    }
+
+    std::vector<FJItem>	sorted = ford_johnson(items, vecComparisons);
+    std::vector<int>	result;
+
+    result.reserve(sorted.size());
+
+    for (size_t i = 0; i < sorted.size(); ++i)
+        result.push_back(sorted[i].value);
+
+    vec = result;
+}
+
+size_t find_item(const std::deque<FJItem>& chain, size_t id)
+{
+    for (size_t i = 0; i < chain.size(); ++i)
+    {
+        if (chain[i].id == id)
+            return (i);
+    }
+
+    return (chain.size());
+}
+
+void binary_insert(std::deque<FJItem>& chain, const FJItem& item,
+    size_t paired_id, size_t& comparisons)
+{
+    size_t left = 0;
+    size_t right = find_item(chain, paired_id);
+
+    while (left < right)
+    {
+        size_t mid = left + (right - left) / 2;
+
+        ++comparisons;
+
+        if (chain[mid].value < item.value)
+            left = mid + 1;
+        else
+            right = mid;
+    }
+
+    chain.insert(chain.begin() + left, item);
+}
+
+std::deque<FJItem> ford_johnson(const std::deque<FJItem>& arr,
+    size_t& comparisons)
+{
+    if (arr.size() <= 1)
+        return (arr);
+
+    std::deque<FJPair> pairs;
+    std::deque<FJItem> larges;
+    FJItem straggler;
+    bool has_straggler = false;
+
+    for (size_t i = 0; i + 1 < arr.size(); i += 2)
+    {
+        FJPair pair;
+
+        ++comparisons;
+
+        if (arr[i].value < arr[i + 1].value)
+        {
+            pair.small = arr[i];
+            pair.large = arr[i + 1];
+        }
+        else
+        {
+            pair.small = arr[i + 1];
+            pair.large = arr[i];
+        }
+
+        pairs.push_back(pair);
+        larges.push_back(pair.large);
+    }
+
+    if (arr.size() % 2 != 0)
+    {
+        straggler = arr.back();
+        has_straggler = true;
+    }
+
+    std::deque<FJItem> sorted_larges = ford_johnson(larges, comparisons);
+    std::deque<FJPair> sorted_pairs;
+
+    for (size_t i = 0; i < sorted_larges.size(); ++i)
+    {
+        for (size_t j = 0; j < pairs.size(); ++j)
+        {
+            if (pairs[j].large.id == sorted_larges[i].id)
+            {
+                sorted_pairs.push_back(pairs[j]);
+                break;
+            }
+        }
+    }
+
+    std::deque<FJItem> main_chain;
+    std::deque<FJPair> pend;
+
+    if (!sorted_pairs.empty())
+    {
+        main_chain.push_back(sorted_pairs[0].small);
+
+        for (size_t i = 0; i < sorted_larges.size(); ++i)
+            main_chain.push_back(sorted_larges[i]);
+
+        for (size_t i = 1; i < sorted_pairs.size(); ++i)
+            pend.push_back(sorted_pairs[i]);
+    }
+
+    std::vector<size_t> order = jacobsthal_sequence(pend.size());
+
+    for (size_t i = 0; i < order.size(); ++i)
+    {
+        size_t index = order[i];
+
+        if (index < pend.size())
+        {
+            binary_insert(main_chain, pend[index].small,
+                pend[index].large.id, comparisons);
+        }
+    }
+
+    if (has_straggler)
+        binary_insert(main_chain, straggler, main_chain.size(), comparisons);
+
+    return (main_chain);
 }
 
 void PmergeMe::sortDeque()
 {
-	deq = deq_misort(deq);
-}
+    std::deque<FJItem> items;
 
-template <typename Container>
-static void binary_insert(Container& chain, int value)
-{
-	typename Container::iterator it =
-		std::lower_bound(chain.begin(), chain.end(), value);
-	chain.insert(it, value);
-}
+    for (size_t i = 0; i < deq.size(); ++i)
+    {
+        FJItem item;
 
-static std::vector<size_t> jacobsthal_sequence(size_t n)
-{
-	std::vector<size_t> seq;
-	if (n == 0)
-		return (seq);
+        item.value = deq[i];
+        item.id = i;
 
-	std::vector<size_t> jacob;
-	jacob.push_back(1);
-	jacob.push_back(3);
+        items.push_back(item);
+    }
 
-	while (jacob.back() < n)
-	{
-		size_t sz = jacob.size();
-		size_t next = jacob[sz - 1] + 2 * jacob[sz - 2];
-		jacob.push_back(next);
-	}
+    std::deque<FJItem> sorted = ford_johnson(items, deqComparisons);
+    std::deque<int> result;
 
-	std::vector<bool> used(n, false);
+    for (size_t i = 0; i < sorted.size(); ++i)
+        result.push_back(sorted[i].value);
 
-	for (size_t i = 0; i < jacob.size(); i++)
-	{
-		size_t idx = jacob[i];
-		if (idx > n)
-			idx = n;
-		if (idx > 0 && !used[idx - 1])
-		{
-			seq.push_back(idx - 1);
-			used[idx - 1] = true;
-		}
-	}
-
-	for (size_t i = 0; i < n; i++)
-	{
-		if (!used[i])
-			seq.push_back(i);
-	}
-
-	return (seq);
-}
-
-std::vector<int> PmergeMe::vec_misort(const std::vector<int>& arr)
-{
-	if (arr.size() <= 1)
-		return (arr);
-
-	std::vector<int>					main_chain;
-	std::vector<int>					pend;
-	std::vector<std::pair<int, int> >	pairs;
-	bool								has_straggler = false;
-	int									straggler = 0;
-
-	pairs.reserve(arr.size() / 2 + 1);
-
-	for (size_t i = 0; i < arr.size(); i += 2)
-	{
-		if (i + 1 < arr.size())
-		{
-			if (arr[i] < arr[i + 1])
-				pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
-			else
-				pairs.push_back(std::make_pair(arr[i + 1], arr[i]));
-		}
-		else
-		{
-			has_straggler = true;
-			straggler = arr[i];
-		}
-	}
-
-	for (size_t i = 0; i < pairs.size(); i++)
-	{
-		main_chain.push_back(pairs[i].second);
-		pend.push_back(pairs[i].first);
-	}
-
-	if (main_chain.size() > 1)
-		main_chain = vec_misort(main_chain);
-
-	std::vector<size_t> order = jacobsthal_sequence(pend.size());
-
-	for (size_t i = 0; i < order.size(); i++)
-	{
-		if (order[i] < pend.size())
-			binary_insert(main_chain, pend[order[i]]);
-	}
-
-	if (has_straggler)
-		binary_insert(main_chain, straggler);
-
-	return (main_chain);
-}
-
-std::deque<int> PmergeMe::deq_misort(const std::deque<int>& arr)
-{
-	if (arr.size() <= 1)
-		return (arr);
-
-	std::deque<int>						main_chain;
-	std::deque<int>						pend;
-	std::vector<std::pair<int, int> >	pairs;
-	bool								has_straggler = false;
-	int									straggler = 0;
-
-	pairs.reserve(arr.size() / 2 + 1);
-
-	for (size_t i = 0; i < arr.size(); i += 2)
-	{
-		if (i + 1 < arr.size())
-		{
-			if (arr[i] < arr[i + 1])
-				pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
-			else
-				pairs.push_back(std::make_pair(arr[i + 1], arr[i]));
-		}
-		else
-		{
-			has_straggler = true;
-			straggler = arr[i];
-		}
-	}
-
-	for (size_t i = 0; i < pairs.size(); i++)
-	{
-		main_chain.push_back(pairs[i].second);
-		pend.push_back(pairs[i].first);
-	}
-
-	if (main_chain.size() > 1)
-		main_chain = deq_misort(main_chain);
-
-	std::vector<size_t> order = jacobsthal_sequence(pend.size());
-
-	for (size_t i = 0; i < order.size(); i++)
-	{
-		if (order[i] < pend.size())
-			binary_insert(main_chain, pend[order[i]]);
-	}
-
-	if (has_straggler)
-		binary_insert(main_chain, straggler);
-
-	return (main_chain);
+    deq = result;
 }

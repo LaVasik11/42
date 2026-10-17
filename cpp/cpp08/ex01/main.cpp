@@ -20,23 +20,20 @@ int	main()
 	}
 
 	std::cout << "-------------------------" << std::endl;
-	std::vector<int>	arr;
-
-	for (int i = 0; i < 1000000; i++)
+	
+	int	size = 1000000000;
+	Span sp2(size);
+	for (int i = 0; i < size; i++)
 	{
-		arr.push_back(i);
+		sp2.addNumber(i);
 	}
-
-	Span sp2(1000000);
-
-	sp2.addNumber(arr.begin(), arr.end());
 
 	std::cout << sp2.shortestSpan() << std::endl;
 	std::cout << sp2.longestSpan() << std::endl;
 
 	try
 	{
-		sp2.addNumber(arr.begin(), arr.end());
+		sp2.addNumber(1);
 	}
 	catch (std::exception &e)
 	{

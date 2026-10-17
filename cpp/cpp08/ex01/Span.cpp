@@ -2,7 +2,7 @@
 
 Span::Span() : max_size(0) {}
 
-Span::Span(unsigned int N) : max_size(N) {}
+Span::Span(unsigned int n) : max_size(n) {}
 
 Span::Span(const Span& other)
 {
@@ -26,13 +26,6 @@ void	Span::addNumber(int n)
 	if (vect.size() >= max_size)
 		throw ContainerIsFullException();
 	vect.push_back(n);
-}
-
-void    Span::addNumber(std::vector<int>::iterator begin, std::vector<int>::iterator end)
-{
-	if (vect.size() + std::distance(begin, end) > max_size)
-		throw ContainerIsFullException();
-	vect.insert(vect.end(), begin, end);
 }
 
 int Span::shortestSpan()
@@ -60,12 +53,12 @@ int Span::longestSpan()
 }
 
 
-const char* Span::ContainerIsFullException::what() const noexcept
+const char* Span::ContainerIsFullException::what() const throw()
 {
 	return ("Container is full");
 }
 
-const char* Span::TooFewNumbersException::what() const noexcept
+const char* Span::TooFewNumbersException::what() const throw()
 {
 	return ("Too few Numbers");
 }

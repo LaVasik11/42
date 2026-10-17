@@ -17,20 +17,19 @@ public:
 	Span& operator=(const Span& other);
 
 	void	addNumber(int n);
-    void    addNumber(std::vector<int>::iterator begin, std::vector<int>::iterator end);
 	int		shortestSpan();
 	int		longestSpan();
 
 	class ContainerIsFullException : public std::exception
 	{
 		public:
-			virtual const char *what() const noexcept;
+			virtual const char *what() const throw();
 	};
 
     class TooFewNumbersException : public std::exception
     {
         public:
-            virtual const char *what() const noexcept;
+            virtual const char *what() const throw();
     };
 private:
     unsigned int		max_size;
