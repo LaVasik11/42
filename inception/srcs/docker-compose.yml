@@ -1,10 +1,13 @@
 services:
   mariadb:
     build: ./requirements/mariadb
+    image: mariadb:inception
     container_name: mariadb
     restart: always
-    env_file:
-      - .env
+    secrets:
+      - db_password
+      - db_root_password
+      - db_credentials
     volumes:
       - mariadb:/var/lib/mysql
     networks:
@@ -12,8 +15,13 @@ services:
 
   wordpress:
     build: ./requirements/wordpress
+    image: wordpress:inception
     container_name: wordpress
     restart: always
+    secrets:
+      - db_password
+      - db_credentials
+      - credentials
     env_file:
       - .env
     volumes:
@@ -22,6 +30,7 @@ services:
       - inception
 
   nginx:
+    image: nginx:inception
     build: ./requirements/nginx
     container_name: nginx
     restart: always
@@ -33,6 +42,16 @@ services:
       - "443:443"
     networks:
       - inception
+
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_credentials:
+    file: ../secrets/db_credentials.txt
+  credentials:
+    file: ../secrets/credentials.txt
 
 
 networks:
