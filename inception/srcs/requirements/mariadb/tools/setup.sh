@@ -16,7 +16,6 @@ if [ -z "$DB_PASSWORD" ] || [ -z "$DB_ROOT_PASSWORD" ] || [ -z "$MYSQL_DATABASE"
     exit 1
 fi
 
-chown -R mysql:mysql /var/lib/mysql
 
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
