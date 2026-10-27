@@ -58,4 +58,17 @@ if [ ! -f wp-config.php ]; then
         --allow-root
 fi
 
+if wp user get "$WP_ADMIN_USER" --field=ID --allow-root >/dev/null 2>&1; then
+    wp user update "$WP_ADMIN_USER" \
+        --user_pass="$WP_ADMIN_PASSWORD" \
+        --user_email="$WP_ADMIN_EMAIL" \
+        --role=administrator \
+        --allow-root
+else
+    wp user create "$WP_ADMIN_USER" "$WP_ADMIN_EMAIL" \
+        --user_pass="$WP_ADMIN_PASSWORD" \
+        --role=administrator \
+        --allow-root
+fi
+
 exec php-fpm8.2 -F

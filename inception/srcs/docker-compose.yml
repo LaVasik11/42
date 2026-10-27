@@ -34,7 +34,7 @@ services:
     build: ./requirements/nginx
     container_name: nginx
     restart: always
-	env_file:
+    env_file:
       - .env
     depends_on:
       - wordpress
