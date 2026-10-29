@@ -53,7 +53,7 @@ void BitcoinExchange::execute(const char *filename)
 
 		if (!date.empty())
 			date = trim(date);
-		if (validate_date(date) == false)
+		if (!validate_date(date))
 		{
 			std::cout << "Error: bad input => " << date << std::endl;
 			continue;
@@ -69,26 +69,25 @@ void BitcoinExchange::execute(const char *filename)
 
 void BitcoinExchange::multiplyWithQuote(std::string const &date, double price)
 {
-	std::map<std::string, double>::iterator it = exchange_rate.find(date);
-	if (it != exchange_rate.end())
-		std::cout << date << " => " << price << " = " << price * it->second << std::endl;
-	else
-	{
-		std::map<std::string, double>::iterator it2 = exchange_rate.lower_bound(date);
-		if (it2 == exchange_rate.begin())
-			std::cout << date << " => " << price << " = " << price * it2->second << std::endl;
-		else
-		{
-			it2--;
-			std::cout << date << " => " << price << " = " << price * it2->second << std::endl;
-		}
-	}
+    if (exchange_rate.empty())
+        return;
+
+    std::map<std::string, double>::const_iterator it = exchange_rate.find(date);
+
+    if (it == exchange_rate.end())
+    {
+        it = exchange_rate.lower_bound(date);
+        if (it == exchange_rate.end() || (it != exchange_rate.begin() && it->first != date))
+			--it;
+    }
+
+    std::cout << date << " => " << price << " = " << price * it->second << std::endl;
 }
 
 double	BitcoinExchange::validate_price(const std::string& price)
 {
-	double priceValue;
-	std::istringstream priceStream(price);
+	double				priceValue;
+	std::istringstream	priceStream(price);
 
 	if (!(priceStream >> priceValue))
 	{
