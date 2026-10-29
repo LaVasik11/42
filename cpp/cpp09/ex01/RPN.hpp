@@ -31,13 +31,12 @@ public:
 	};
 private:
 	std::stack<int>	stack;
-	
-	bool	is_valid(const std::string& str);
-	int		calculate(int a, int b, const std::string& op);
-	int		plus(int a, int b);
-	int		minus(int a, int b);
-	int		multiply(int a, int b);
-	int		divide(int a, int b);
+	bool			is_valid(const std::string& str);
+	int				calculate(int a, int b, const std::string& op);
+	int				plus(int a, int b);
+	int				minus(int a, int b);
+	int				multiply(int a, int b);
+	int				divide(int a, int b);
 };
 
 #endif
