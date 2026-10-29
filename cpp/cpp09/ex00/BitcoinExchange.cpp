@@ -122,9 +122,9 @@ bool	BitcoinExchange::validate_date(const std::string& date)
 			return (false);
 	}
 
-	int y = std::stoi(date.substr(0, 4));
-	int m = std::stoi(date.substr(5, 2));
-	int d = std::stoi(date.substr(8, 2));
+	int y = std::atoi(date.substr(0, 4).c_str());
+	int m = std::atoi(date.substr(5, 2).c_str());
+	int d = std::atoi(date.substr(8, 2).c_str());
 
 	if (m < 1 || m > 12 || d < 1)
 		return (false);
