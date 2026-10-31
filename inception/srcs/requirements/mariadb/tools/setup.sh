@@ -16,32 +16,39 @@ if [ -z "$DB_PASSWORD" ] || [ -z "$DB_ROOT_PASSWORD" ] || [ -z "$MYSQL_DATABASE"
     exit 1
 fi
 
-
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
+    FRESH_DB=1
+else
+    FRESH_DB=0
+fi
 
-    mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking &
-    pid="$!"
+mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking &
+pid="$!"
 
-    until mysqladmin ping --silent; do
-        if ! kill -0 "$pid" 2>/dev/null; then
-            echo "Error: MariaDB failed to start"
-            exit 1
-        fi
-        sleep 1
-    done
+until mysqladmin ping --silent; do
+    if ! kill -0 "$pid" 2>/dev/null; then
+        echo "Error: MariaDB failed to start"
+        exit 1
+    fi
+    sleep 1
+done
 
+if [ "$FRESH_DB" -eq 1 ]; then
     mysql -u root <<EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
+EOF
+fi
+
+mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+ALTER USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    mysqladmin -u root -p"${DB_ROOT_PASSWORD}" shutdown
-
-    wait "$pid" || true
-fi
+mysqladmin -u root -p"${DB_ROOT_PASSWORD}" shutdown
+wait "$pid" || true
 
 exec mysqld --user=mysql --bind-address=0.0.0.0 --datadir=/var/lib/mysql
