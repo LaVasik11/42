@@ -1,0 +1,18 @@
+../../../../rendu/sandbox/sandbox.c: In function ‘print_exit’:
+../../../../rendu/sandbox/sandbox.c:35:33: error: implicit declaration of function ‘strsignal’; did you mean ‘ssignal’? [-Werror=implicit-function-declaration]
+   35 |                                 strsignal(WTERMSIG(status)));
+      |                                 ^~~~~~~~~
+      |                                 ssignal
+../../../../rendu/sandbox/sandbox.c:34:48: error: format ‘%s’ expects argument of type ‘char *’, but argument 2 has type ‘int’ [-Werror=format=]
+   34 |                         printf("Bad function: %s\n",
+      |                                               ~^
+      |                                                |
+      |                                                char *
+      |                                               %d
+   35 |                                 strsignal(WTERMSIG(status)));
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                 |
+      |                                 int
+cc1: all warnings being treated as errors
+[31m[1mCOMPILATION FAILED(B[0m
+[31mYour code did not compile. Please fix the errors above.(B[m

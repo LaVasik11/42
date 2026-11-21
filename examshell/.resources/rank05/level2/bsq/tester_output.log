@@ -1,0 +1,44 @@
+[0;34m🔍 Running COMPREHENSIVE TESTING for bsq[0m
+==========================================
+
+[0;34m📦 Compiling reference solution...[0m
+[0;32m✅ Reference compilation successful![0m
+
+[0;34m📦 Compiling user solution...[0m
+[0;32m✅ User compilation successful![0m
+
+[0;34m🚀 Running Test 1...[0m
+[0;32m✅ Test 1 output matches reference![0m
+[0;34m🚀 Running Test 2...[0m
+[0;32m✅ Test 2 output matches reference![0m
+[0;34m🚀 Running Test 3...[0m
+[0;32m✅ Test 3 output matches reference![0m
+[0;34m🚀 Running Test 4 (stdin)...[0m
+[0;32m✅ Test 4 output matches reference![0m
+[0;34m🚀 Running Valgrind memory check...[0m
+==9706== Memcheck, a memory error detector
+==9706== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==9706== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==9706== Command: ./user_bsq test1.map
+==9706== 
+.....xxxxxxx...............
+....oxxxxxxx...............
+.....xxxxxxxo..............
+.....xxxxxxx...............
+....oxxxxxxx...............
+.....xxxxxxx...o...........
+.....xxxxxxx...............
+......o..............o.....
+..o.......o................
+==9706== 
+==9706== HEAP SUMMARY:
+==9706==     in use at exit: 0 bytes in 0 blocks
+==9706==   total heap usage: 15 allocs, 15 frees, 9,053 bytes allocated
+==9706== 
+==9706== All heap blocks were freed -- no leaks are possible
+==9706== 
+==9706== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+[0;32m✅ No memory leaks detected.[0m
+=======================================
+[0;32m✅ PASSED![0m
+=======================================
